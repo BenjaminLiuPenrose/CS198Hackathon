@@ -6,7 +6,14 @@ Quick Start
 3. look at conversation.py the respond method, (chatbot_simple.ipynb)
 4. run `python main.py` test examples in test.txt
 
-To do list:
+Next thing to do:
+1. add more intent examples in chatbot.txt
+2. remove my implementation for advanced command
+3. add more test examples
+4. train a spacy model for named entity detection and keyword detection
+5. online version
+
+Misc:
 1. intent identification - add distinguish words like "how many" "?"
 	- train name entity recognizer - https://github.com/explosion/spacy/blob/master/examples/training/train_ner.py
 	- distinguish two sentence with key words
