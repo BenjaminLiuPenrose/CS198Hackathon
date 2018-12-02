@@ -76,9 +76,19 @@ class Conversation:
         Rets:
         str, sentence after preprocess
         """
-        return (sentence.replace(r"[^\w\s]", "") # replace all non-word
-                        .strip() # strip off heading and trailing space
-                        .lower())
+        sentence = sentence.replace(r"[^\w\s]", "").strip().lower()
+        s = set(stopwords.words('english'))
+        s.remove("me")
+        s.remove("what")
+        s.remove("about")
+        
+        split_sentence = list (filter (lambda w: not w in s, sentence.split()))
+        full_sentence = ""
+        for token in split_sentence:
+            full_sentence += " " + token
+        
+        print(full_sentence)
+        return full_sentence
 
     def prepare_take_one_note(self, sentence):
         """
