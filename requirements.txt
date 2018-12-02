@@ -1,0 +1,7 @@
+nltk
+sklearn
+spacy
+numpy
+msgpack==0.5.6
+num2words
+rake_nltk

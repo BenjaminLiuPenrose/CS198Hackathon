@@ -1,0 +1,4 @@
+Hey, please take a note for me.
+What was my last note?
+Hey, go ahead and delete my previous note.
+What's total number of notes that I have?
