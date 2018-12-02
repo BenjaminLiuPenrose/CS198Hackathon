@@ -1,5 +1,13 @@
 Please take a note for me.
+Can you take a note?
 What was my last note?
+Read me my last note.
+What was my previous note?
+Read me my previous note.
 Hey, go ahead and delete my previous note.
+Delete my last note for me.
 What's total number of notes that I have?
+How many notes do I have?
 Remind me to do
+Hey, remind me to
+Let me know
