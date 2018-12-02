@@ -4,6 +4,7 @@ import random
 import string # to process standard python strings
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
+from nltk.corpus import stopwords
 import spacy
 import en_core_web_sm
 from num2words import num2words
