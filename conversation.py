@@ -135,12 +135,16 @@ class Conversation:
         Rets:
         str, proper response
         """
+        print(idx)
         if self.calc_num_notes() == 0: # there is no note
+            # print("error 139")
             return "Sorry, the note you want to retrive doesn't exist."
         elif idx == np.inf or idx == -np.inf: # the quested note idx is outside of notes length
+            # print("error 142")
             return "Sorry, the note you want to retrive doesn't exist."
         elif (idx > 0 and idx >= self.calc_num_notes()) or (idx < 0 and -idx > self.calc_num_notes()):
             # the quested note idx is outside of notes length
+            # print("error 146", idx, self.calc_num_notes())
             return "Sorry, the note you want to retrive doesn't exist."
         else:
             return "That note was: {}".format(self.notes[idx])
@@ -167,7 +171,7 @@ class Conversation:
         """
         call method take_one_note
         """
-        self.take_one_note(sentence)
+        return self.take_one_note(sentence)
 
     def respond(self, sentence):
         """
@@ -182,7 +186,9 @@ class Conversation:
         Rets:
         response    -- str, proper response
         """
-        ### Preparation Phrase
+        ############################
+        ### Preparation Phrase #####
+        ############################
         response = "" # response string, to be returned, capable be appended with multiple responses in advanced version
         sentence = self.prepro_sentence(sentence); # print(sentence)
         idx = None
@@ -198,7 +204,10 @@ class Conversation:
         words_all = list(set(self._word_tokens))
         tfidf = TfidfVec.fit_transform(sent_tokens) # fit a tfidf model
 
-        ### Handling Phrase
+
+        ############################
+        ### Handling Phrase ########
+        ############################
         # Identify ordinal number (with "notes") => to number + "last"/"previous" => retrive/delete notes or just change idx
         sentence_nlp = nlp(sentence)
         if any([True for token in sentence_nlp.ents if token.label_ == 'ORDINAL']): # identify ordinal number
@@ -208,7 +217,7 @@ class Conversation:
                 ordinal_key = num2words(i, to="ordinal")
                 ordinal_to_num[ordinal_key] = i
                 ordinal_to_num[ordinal_key.replace("-", " ")] = i # pay attention to the case whether "-" exists
-            idx = ordinal_to_num.get(ordinal, np.inf) - 1 # index matching
+            idx = ordinal_to_num.get(str(ordinal), np.inf) - 1 # index matching
             if "last" in sentence.split() or "previous" in sentence.split():
                 idx = -idx - 1 # index matching
 
@@ -224,22 +233,27 @@ class Conversation:
 
         # Identify intention
         vals = cosine_similarity(tfidf[-1], tfidf) # use tfidf model to identify intention
-        idx = vals.argsort()[0][-2]
+        idxx = vals.argsort()[0][-2]
         flat = vals.flatten()
         flat.sort()
         req_tfidf = flat[-2]
 
-        ### Responding Phrase
+
+        ############################
+        ### Responding Phrase ######
+        ############################
         if(req_tfidf==0): # sentence doesn't fit into any provided intend in chatbot.txt
             response = response + "I am sorry! I don't understand you. Please try again!"
             return response
 
-        intent = self._sent_tokens[idx]
+        intent = self._sent_tokens[idxx]
+        if "total" in sentence.strip() or "how many" in sentence: # manually overwrite, need an advanced version
+            intent = "what's total number of notes that i have?"
         print("DEBUG: intent is - " + intent)
         if intent == "please take a note for me.": # intent is prepare_take_one_note
             response = response + self.prepare_take_one_note(sentence)
             return response
-        elif intent == "what's total number of notes that i have?" or intent == "how many notes in total?": # intent is calc_num_notes
+        elif intent == "what's total number of notes that i have?": # intent is calc_num_notes
             response = response + "You have {} notes in total".format(self.calc_num_notes())
             return response
         elif intent == "what was my last note?": # intent is retrive_one_note
