@@ -41,6 +41,16 @@ class Conversation:
         respond
         """
         self.notes = []
+        self.intent = {"take note": "take a note",
+                       "add note": "take a note",
+                       "remind me": "take a note with content",
+                       "delete note": "delete a note",
+                       "remove note": "remove a note",
+                       "read note": "retrieve a note",
+                       "what last note": "retrieve a note",
+                       "which note": "retrieve a note",
+                       "total number" "total notes"
+                       }
 
         self._response = {
                         "calc_num_notes": ("You have ", " notes in total"),
