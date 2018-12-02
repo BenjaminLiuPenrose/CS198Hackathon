@@ -135,7 +135,7 @@ class Conversation:
         Rets:
         str, proper response
         """
-        print(idx)
+        # print(idx)
         if self.calc_num_notes() == 0: # there is no note
             # print("error 139")
             return "Sorry, the note you want to retrive doesn't exist."
