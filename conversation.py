@@ -40,35 +40,68 @@ class Conversation:
         take_note_with_content
         respond
         """
+        self.original = ""
         self.notes = []
         self.intent = {"take note": "take a note",
                        "add note": "take a note",
                        "remind me": "take a note with content",
                        "delete note": "delete a note",
-                       "remove note": "remove a note",
+                       "remove note": "delete a note",
                        "read note": "retrieve a note",
                        "what last note": "retrieve a note",
                        "which note": "retrieve a note",
-                       "total number" "total notes"
+                       "total number" : "total notes",
+                       "many number" : "total notes"
                        }
+        #self.key_vec = [nltk.sent_tokenize(elem) for elem in  ["take note", "add note", "remind me", "delete note", "remove note", "read note", "what last note"]]
 
         self._response = {
-                        "calc_num_notes": ("You have ", " notes in total"),
-                        "prepare_take_one_note": "OK, what would you like me to take?",
-                        "take_one_note": "Alright, I have noted that.",
-                        "retrieve_one_note": "That note was: ",
-                        "retrieve_one_note_sorry": "Sorry, the note you want to retrive doesn't exist.",
-                        "delete_one_note": ("That note '", "' is deleted"),
-                        "delete_one_note_sorry": "Sorry, the note you want to retrive doesn't exist.",
+                        "calc_num_notes": [("You have ", " notes in total"),
+                                           ("You have ", " notes in total")],
+                        "prepare_take_one_note": ["OK, what would you like me to take?",
+                                                  "Oh, sure. I am ready.",
+                                                  "Say it.",
+                                                  "I will record what you say next."],
+                        "take_one_note": ["Alright, I have noted that.",
+                                          "Sir, your note is recorded.",
+                                          "Cool, I get it.",
+                                          "Note recieved. You can retrieve it or delete it any time",
+                                          "Okay, I have taken the note."],
+                        "retrieve_one_note": ["That note was: ",
+                                              "The note you are referring to was: "],
+                        "retrieve_one_note_sorry": ["Sorry, the note you want to retrive doesn't exist.",
+                                                    "Note to be retrieve not found",
+                                                    "Sorry, note cannot be retrieved",
+                                                    "Sorry, retrieve failure."],
+                        "delete_one_note": [("That note '", "' is deleted"),
+                                            ("That note '", "' is deleted")],
+                        "delete_one_note_sorry": ["Sorry, the note you want to delete doesn't exist."
+                                                    "Note to be delete not found",
+                                                    "Sorry, note cannot be deleted",
+                                                    "Sorry, deletion failure."],
                         "intent not found": "I am sorry! I don't understand you. Please try again!"
                         } # each value can be a list and then randomized choice
+
+
+        # #self._response = {
+        #                "calc_num_notes": ("You have ", " notes in total"),
+        #                  "prepare_take_one_note": "OK, what would you like me to take?",
+        #                 "take_one_note": "Alright, I have noted that.",
+        #                 "retrieve_one_note": "That note was: ",
+        #                 "retrieve_one_note_sorry": "Sorry, the note you want to retrive doesn't exist.",
+        #                 "delete_one_note": ("That note '", "' is deleted"),
+        #                 "delete_one_note_sorry": "Sorry, the note you want to retrive doesn't exist.",
+        #                 "intent not found": "I am sorry! I don't understand you. Please try again!"
+        #                 } # each value can be a list and then randomized choice
         self._ready_take_note = False
         self._facet_dict = {}
         self._non_facet_noun = ["note", "tomorrow"] # words to be removed from facet dict
 
         self._raw = (open(chatbot_txt,'r',errors = 'ignore').read()
                                                             .lower())
-        self._sent_tokens = nltk.sent_tokenize(self._raw)
+        self._sent_tokens = nltk.sent_tokenize(". ".join(["take note", "add note", "remind me", "delete note", "remove note", "read note"]))
+        self._sent_tokens_what = nltk.sent_tokenize(". ".join(["what last note", "which note", "total number", "many number"]))
+
         self._word_toekns = nltk.word_tokenize(self._raw)
 
     def calc_num_notes(self):
@@ -92,15 +125,32 @@ class Conversation:
         s.remove("me")
         s.remove("what")
         s.remove("about")
-        
+        s.remove("have")
+
         split_sentence = list (filter (lambda w: not w in s, sentence.split()))
+        #return split_sentence
         full_sentence = ""
         for token in split_sentence:
             full_sentence += " " + token
-        
-        print(full_sentence)
-        return full_sentence
 
+        #print(full_sentence)
+        return full_sentence
+    def get_input_vec(self, preprocessed_input):
+        return [nltk.word_tokenize(elem) for elem in preprocessed_input]
+
+    def get_cloest_intent(self, intput_vec):
+        return
+
+    # def prepare_take_one_note(self, sentence):
+    #     """
+    #     Args:
+    #     sentence
+    #
+    #     Rets:
+    #     str, proper response
+    #     """
+    #     self._ready_take_note = True # set ready_take_note to be true, then the bot will only record whatever the next sentence is.
+    #     return "OK, what would you like me to take?"
     def prepare_take_one_note(self, sentence):
         """
         Args:
@@ -110,8 +160,21 @@ class Conversation:
         str, proper response
         """
         self._ready_take_note = True # set ready_take_note to be true, then the bot will only record whatever the next sentence is.
-        return "OK, what would you like me to take?"
+        return random.choice(self._response["prepare_take_one_note"])
 
+
+    # def take_one_note(self, sentence):
+    #     """
+    #     Args:
+    #     sentence
+    #
+    #     Rets:
+    #     str, proper response
+    #     """
+    #     self.notes.append(sentence)
+    #     self.update_facet_dict(sentence)
+    #     self._ready_take_note = False
+    #     return "Alright, I have noted that."
     def take_one_note(self, sentence):
         """
         Args:
@@ -123,7 +186,8 @@ class Conversation:
         self.notes.append(sentence)
         self.update_facet_dict(sentence)
         self._ready_take_note = False
-        return "Alright, I have noted that."
+        return random.choice(self._response["take_one_note"])
+
 
     def update_facet_dict(self, sentence):
         """
@@ -148,6 +212,27 @@ class Conversation:
         self._facet_dict.update(dict(tmp)) # update the dict with {lemma_word: (idx, score)} # can use score in an advanced version
 
 
+    # def retrieve_one_note(self, idx=-1):
+    #     """
+    #     Args:
+    #     idx     -- index of the relevent note
+    #
+    #     Rets:
+    #     str, proper response
+    #     """
+    #     # print(idx)
+    #     if self.calc_num_notes() == 0: # there is no note
+    #         # print("error 139")
+    #         return "Sorry, the note you want to retrive doesn't exist."
+    #     elif idx == np.inf or idx == -np.inf: # the quested note idx is outside of notes length
+    #         # print("error 142")
+    #         return "Sorry, the note you want to retrive doesn't exist."
+    #     elif (idx > 0 and idx >= self.calc_num_notes()) or (idx < 0 and -idx > self.calc_num_notes()):
+    #         # the quested note idx is outside of notes length
+    #         # print("error 146", idx, self.calc_num_notes())
+    #         return "Sorry, the note you want to retrive doesn't exist."
+    #     else:
+    #         return "That note was: {}".format(self.notes[idx])
     def retrieve_one_note(self, idx=-1):
         """
         Args:
@@ -159,16 +244,42 @@ class Conversation:
         # print(idx)
         if self.calc_num_notes() == 0: # there is no note
             # print("error 139")
-            return "Sorry, the note you want to retrive doesn't exist."
+            return random.choice(self._response["retrieve_one_note_sorry"])
         elif idx == np.inf or idx == -np.inf: # the quested note idx is outside of notes length
             # print("error 142")
-            return "Sorry, the note you want to retrive doesn't exist."
+            return random.choice(self._response["retrieve_one_note_sorry"])
         elif (idx > 0 and idx >= self.calc_num_notes()) or (idx < 0 and -idx > self.calc_num_notes()):
             # the quested note idx is outside of notes length
             # print("error 146", idx, self.calc_num_notes())
-            return "Sorry, the note you want to retrive doesn't exist."
+            return random.choice(self._response["retrieve_one_note_sorry"])
         else:
-            return "That note was: {}".format(self.notes[idx])
+            return "{}{}".format(random.choice(self._response["retrieve_one_note"]), self.notes[idx])
+
+    def delete_one_note(self, idx=-1):
+        """
+        Args:
+        idx     -- index of the relevent note
+
+        Rets:
+        str, proper response
+        """
+        if self.calc_num_notes() == 0:
+            return random.choice(self._response["delete_one_note_sorry"])
+        elif idx == np.inf or idx == -np.inf:
+            return random.choice(self._response["delete_one_note_sorry"])
+        elif (idx > 0 and idx >= self.calc_num_notes()) or (idx < 0 and -idx > self.calc_num_notes()):
+            return random.choice(self._response["delete_one_note_sorry"])
+        else:
+            note_del = self.notes.pop(idx)
+            res = random.choice(self._response["delete_one_note"])
+            return "{}{}{}' is deleted".format(res[0], note_del, res[1])
+
+    def take_note_with_content(self, sentence):
+        """
+        call method take_one_note
+        """
+        return self.take_one_note(sentence)
+
 
     def delete_one_note(self, idx=-1):
         """
@@ -210,6 +321,7 @@ class Conversation:
         ############################
         ### Preparation Phrase #####
         ############################
+        self.original = sentence
         response = "" # response string, to be returned, capable be appended with multiple responses in advanced version
         sentence = self.prepro_sentence(sentence); # print(sentence)
         idx = None
@@ -217,18 +329,51 @@ class Conversation:
         TfidfVec = TfidfVectorizer(tokenizer=LemNormalize, stop_words='english')
 
         if self._ready_take_note: # if ready_take_note is true, the agent will take whatever the sentence is
-            return self.take_one_note(sentence)
+            return self.take_one_note(self.original)
 
-        sent_tokens = self._sent_tokens.copy() # make a copy of sent_tokens, so that the new sentence won't be stored after calling method
-        sent_tokens.append(sentence)
-        self._word_tokens = self._word_toekns + nltk.word_tokenize(sentence) # for sanity check, store all the word tokens, not used
-        words_all = list(set(self._word_tokens))
-        tfidf = TfidfVec.fit_transform(sent_tokens) # fit a tfidf model
 
 
         ############################
         ### Handling Phrase ########
         ############################
+        ### identify questions or not
+        question = False
+        sentence_lst = self.original.lower().split()
+        for word in ["What","what", "what's", "how", "which", "?"]:
+            if word in sentence_lst:
+                question = True
+            if self.original and'?' == self.original[-1]:
+                question = True
+
+        if not question:
+            sent_tokens = self._sent_tokens.copy() # make a copy of sent_tokens, so that the new sentence won't be stored after calling method
+            sent_tokens.append(sentence)
+            #tfidf = TfidfVec.fit_transform(sent_tokens) # fit a tfidf model
+            tfidf = TfidfVec.fit_transform(sent_tokens)
+            # Identify intention
+            vals = cosine_similarity(tfidf[-1], tfidf) # use tfidf model to identify intention
+            idxx = vals.argsort()[0][-2]
+            flat = vals.flatten()
+            flat.sort()
+            req_tfidf = flat[-2]
+            intent = self._sent_tokens[idxx]
+        else:
+            sent_tokens = self._sent_tokens_what.copy() # make a copy of sent_tokens, so that the new sentence won't be stored after calling method
+            sent_tokens.append(sentence)
+            #tfidf = TfidfVec.fit_transform(sent_tokens) # fit a tfidf model
+            tfidf = TfidfVec.fit_transform(sent_tokens)
+            # Identify intention
+            vals = cosine_similarity(tfidf[-1], tfidf) # use tfidf model to identify intention
+            idxx = vals.argsort()[0][-2]
+            flat = vals.flatten()
+            flat.sort()
+            req_tfidf = flat[-2]
+            intent = self._sent_tokens_what[idxx]
+            if "how many" in self.original.lower():
+                intent = "total number"
+
+
+
         # Identify ordinal number (with "notes") => to number + "last"/"previous" => retrive/delete notes or just change idx
         sentence_nlp = nlp(sentence)
         if any([True for token in sentence_nlp.ents if token.label_ == 'ORDINAL']): # identify ordinal number
@@ -252,32 +397,39 @@ class Conversation:
                 else:
                     idx = qry[0]
 
-        # Identify intention
-        vals = cosine_similarity(tfidf[-1], tfidf) # use tfidf model to identify intention
-        idxx = vals.argsort()[0][-2]
-        flat = vals.flatten()
-        flat.sort()
-        req_tfidf = flat[-2]
+
 
 
         ############################
         ### Responding Phrase ######
         ############################
         if(req_tfidf==0): # sentence doesn't fit into any provided intend in chatbot.txt
-            response = response + "I am sorry! I don't understand you. Please try again!"
+            response = response + self._response["intent not found"]
             return response
 
-        intent = self._sent_tokens[idxx]
-        if "total" in sentence.strip() or "how many" in sentence: # manually overwrite, need an advanced version
-            intent = "what's total number of notes that i have?"
-        print("DEBUG: intent is - " + intent)
-        if intent == "please take a note for me.": # intent is prepare_take_one_note
-            response = response + self.prepare_take_one_note(sentence)
+        '''
+        {"take note": "take a note",
+                       "add note": "take a note",
+                       "remind me": "take a note with content",
+                       "delete note": "delete a note",
+                       "remove note": "remove a note",
+                       "read note": "retrieve a note",
+                       "what last note": "retrieve a note",
+                       "which note": "retrieve a note",
+                       "total number" : "total notes"
+                       }
+        '''
+
+
+        intent = intent.replace(".", "")
+        #print("DEBUG: intent is - " + intent)
+        if self.intent[intent] == "take a note": # intent is prepare_take_one_note
+            response = response + self.prepare_take_one_note(self.original)
             return response
-        elif intent == "what's total number of notes that i have?": # intent is calc_num_notes
+        elif self.intent[intent] == "total notes": # intent is calc_num_notes
             response = response + "You have {} notes in total".format(self.calc_num_notes())
             return response
-        elif intent == "what was my last note?": # intent is retrive_one_note
+        elif self.intent[intent] == "retrieve a note": # intent is retrive_one_note
             if idx == None:
                 response = response + self.retrieve_one_note(idx = -1)
             elif idx != None:
@@ -285,7 +437,7 @@ class Conversation:
             else :
                 raise NotImplementedError("Invalid Case!")
             return response
-        elif intent == "hey, go ahead and delete my previous note.": # intent is delete_one_note
+        elif self.intent[intent] == "delete a note": # intent is delete_one_note
             if idx == None:
                 response = response + self.delete_one_note(idx = -1)
             elif idx != None:
@@ -293,12 +445,9 @@ class Conversation:
             else :
                 raise NotImplementedError("Invalid Case!")
             return response
-        elif intent == "remind me to do": # intent is take_one_note_with_content
-            return self.take_note_with_content(sentence)
+        elif self.intent[intent] == "take a note with content": # intent is take_one_note_with_content
+            return self.take_note_with_content(self.original)
         else :
-            response = response + "I am sorry! I don't understand you. Please try again!"
+            response = response + self._response["intent not found"]
             return response
             # return self.take_one_note(sentence)
-
-
-
