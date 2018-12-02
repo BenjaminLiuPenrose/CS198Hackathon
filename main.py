@@ -40,13 +40,13 @@ def evaluate_all(indir):
                 line = line.strip()
                 print('>>> ' + line)
                 print('<<< ' + conversation.respond(line))
-            
+
             print('<' * 30)
 
         print()
 
 def main():
-    
+
     parser = argparse.ArgumentParser()
     parser.add_argument('--dir', type=str)
     args = parser.parse_args()
