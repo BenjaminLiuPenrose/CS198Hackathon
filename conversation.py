@@ -53,7 +53,6 @@ class Conversation:
                        "total number" : "total notes",
                        "many number" : "total notes"
                        }
-        #self.key_vec = [nltk.sent_tokenize(elem) for elem in  ["take note", "add note", "remind me", "delete note", "remove note", "read note", "what last note"]]
 
         self._response = {
                         "calc_num_notes": [("You have ", " notes in total"),
@@ -82,17 +81,6 @@ class Conversation:
                         "intent not found": "I am sorry! I don't understand you. Please try again!"
                         } # each value can be a list and then randomized choice
 
-
-        # #self._response = {
-        #                "calc_num_notes": ("You have ", " notes in total"),
-        #                  "prepare_take_one_note": "OK, what would you like me to take?",
-        #                 "take_one_note": "Alright, I have noted that.",
-        #                 "retrieve_one_note": "That note was: ",
-        #                 "retrieve_one_note_sorry": "Sorry, the note you want to retrive doesn't exist.",
-        #                 "delete_one_note": ("That note '", "' is deleted"),
-        #                 "delete_one_note_sorry": "Sorry, the note you want to retrive doesn't exist.",
-        #                 "intent not found": "I am sorry! I don't understand you. Please try again!"
-        #                 } # each value can be a list and then randomized choice
         self._ready_take_note = False
         self._facet_dict = {}
         self._non_facet_noun = ["note", "tomorrow"] # words to be removed from facet dict
@@ -128,12 +116,10 @@ class Conversation:
         s.remove("have")
 
         split_sentence = list (filter (lambda w: not w in s, sentence.split()))
-        #return split_sentence
         full_sentence = ""
         for token in split_sentence:
             full_sentence += " " + token
 
-        #print(full_sentence)
         return full_sentence
     def get_input_vec(self, preprocessed_input):
         return [nltk.word_tokenize(elem) for elem in preprocessed_input]
@@ -141,16 +127,6 @@ class Conversation:
     def get_cloest_intent(self, intput_vec):
         return
 
-    # def prepare_take_one_note(self, sentence):
-    #     """
-    #     Args:
-    #     sentence
-    #
-    #     Rets:
-    #     str, proper response
-    #     """
-    #     self._ready_take_note = True # set ready_take_note to be true, then the bot will only record whatever the next sentence is.
-    #     return "OK, what would you like me to take?"
     def prepare_take_one_note(self, sentence):
         """
         Args:
@@ -162,19 +138,6 @@ class Conversation:
         self._ready_take_note = True # set ready_take_note to be true, then the bot will only record whatever the next sentence is.
         return random.choice(self._response["prepare_take_one_note"])
 
-
-    # def take_one_note(self, sentence):
-    #     """
-    #     Args:
-    #     sentence
-    #
-    #     Rets:
-    #     str, proper response
-    #     """
-    #     self.notes.append(sentence)
-    #     self.update_facet_dict(sentence)
-    #     self._ready_take_note = False
-    #     return "Alright, I have noted that."
     def take_one_note(self, sentence):
         """
         Args:
@@ -208,31 +171,8 @@ class Conversation:
             phrase = nlp(pair[1])
             tmp.extend([(token.lemma_, (idx, score)) for token in phrase if token.pos_=="NOUN" and token.lemma_ not in non_facet_noun])
 
-        # d2.update({k:v for k,v in d1.iteritems() if v})
         self._facet_dict.update(dict(tmp)) # update the dict with {lemma_word: (idx, score)} # can use score in an advanced version
 
-
-    # def retrieve_one_note(self, idx=-1):
-    #     """
-    #     Args:
-    #     idx     -- index of the relevent note
-    #
-    #     Rets:
-    #     str, proper response
-    #     """
-    #     # print(idx)
-    #     if self.calc_num_notes() == 0: # there is no note
-    #         # print("error 139")
-    #         return "Sorry, the note you want to retrive doesn't exist."
-    #     elif idx == np.inf or idx == -np.inf: # the quested note idx is outside of notes length
-    #         # print("error 142")
-    #         return "Sorry, the note you want to retrive doesn't exist."
-    #     elif (idx > 0 and idx >= self.calc_num_notes()) or (idx < 0 and -idx > self.calc_num_notes()):
-    #         # the quested note idx is outside of notes length
-    #         # print("error 146", idx, self.calc_num_notes())
-    #         return "Sorry, the note you want to retrive doesn't exist."
-    #     else:
-    #         return "That note was: {}".format(self.notes[idx])
     def retrieve_one_note(self, idx=-1):
         """
         Args:
@@ -241,16 +181,12 @@ class Conversation:
         Rets:
         str, proper response
         """
-        # print(idx)
         if self.calc_num_notes() == 0: # there is no note
-            # print("error 139")
             return random.choice(self._response["retrieve_one_note_sorry"])
         elif idx == np.inf or idx == -np.inf: # the quested note idx is outside of notes length
-            # print("error 142")
             return random.choice(self._response["retrieve_one_note_sorry"])
         elif (idx > 0 and idx >= self.calc_num_notes()) or (idx < 0 and -idx > self.calc_num_notes()):
             # the quested note idx is outside of notes length
-            # print("error 146", idx, self.calc_num_notes())
             return random.choice(self._response["retrieve_one_note_sorry"])
         else:
             return "{}{}".format(random.choice(self._response["retrieve_one_note"]), self.notes[idx])
@@ -348,7 +284,6 @@ class Conversation:
         if not question:
             sent_tokens = self._sent_tokens.copy() # make a copy of sent_tokens, so that the new sentence won't be stored after calling method
             sent_tokens.append(sentence)
-            #tfidf = TfidfVec.fit_transform(sent_tokens) # fit a tfidf model
             tfidf = TfidfVec.fit_transform(sent_tokens)
             # Identify intention
             vals = cosine_similarity(tfidf[-1], tfidf) # use tfidf model to identify intention
@@ -360,7 +295,6 @@ class Conversation:
         else:
             sent_tokens = self._sent_tokens_what.copy() # make a copy of sent_tokens, so that the new sentence won't be stored after calling method
             sent_tokens.append(sentence)
-            #tfidf = TfidfVec.fit_transform(sent_tokens) # fit a tfidf model
             tfidf = TfidfVec.fit_transform(sent_tokens)
             # Identify intention
             vals = cosine_similarity(tfidf[-1], tfidf) # use tfidf model to identify intention
@@ -406,21 +340,6 @@ class Conversation:
         if(req_tfidf==0): # sentence doesn't fit into any provided intend in chatbot.txt
             response = response + self._response["intent not found"]
             return response
-
-        '''
-        {"take note": "take a note",
-                       "add note": "take a note",
-                       "remind me": "take a note with content",
-                       "delete note": "delete a note",
-                       "remove note": "remove a note",
-                       "read note": "retrieve a note",
-                       "what last note": "retrieve a note",
-                       "which note": "retrieve a note",
-                       "total number" : "total notes"
-                       }
-        '''
-
-
         intent = intent.replace(".", "")
         #print("DEBUG: intent is - " + intent)
         if self.intent[intent] == "take a note": # intent is prepare_take_one_note
@@ -450,4 +369,3 @@ class Conversation:
         else :
             response = response + self._response["intent not found"]
             return response
-            # return self.take_one_note(sentence)
