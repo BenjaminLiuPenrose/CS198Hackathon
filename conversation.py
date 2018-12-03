@@ -42,15 +42,32 @@ class Conversation:
         self.notes = []
 
         self._response = {
-                        "calc_num_notes": ("You have ", " notes in total"),
-                        "prepare_take_one_note": "OK, what would you like me to take?",
-                        "take_one_note": "Alright, I have noted that.",
-                        "retrieve_one_note": "That note was: ",
-                        "retrieve_one_note_sorry": "Sorry, the note you want to retrive doesn't exist.",
-                        "delete_one_note": ("That note '", "' is deleted"),
-                        "delete_one_note_sorry": "Sorry, the note you want to retrive doesn't exist.",
+                        "calc_num_notes": [("You have ", " notes in total"),
+                                           ("You have ", " notes in total")],
+                        "prepare_take_one_note": ["OK, what would you like me to take?",
+                                                  "Oh, sure. I am ready.",
+                                                  "Say it.",
+                                                  "I will record what you say next."],
+                        "take_one_note": ["Alright, I have noted that.",
+                                          "Sir, your note is recorded.",
+                                          "Cool, I get it.",
+                                          "Note recieved. You can retrieve it or delete it any time",
+                                          "Okay, I have taken the note."],
+                        "retrieve_one_note": ["That note was: ",
+                                              "The note you are referring to was: "],
+                        "retrieve_one_note_sorry": ["Sorry, the note you want to retrive doesn't exist.",
+                                                    "Note to be retrieve not found",
+                                                    "Sorry, note cannot be retrieved",
+                                                    "Sorry, retrieve failure."],
+                        "delete_one_note": [("That note '", "' is deleted"),
+                                            ("That note '", "' is deleted")],
+                        "delete_one_note_sorry": ["Sorry, the note you want to delete doesn't exist."
+                                                    "Note to be delete not found",
+                                                    "Sorry, note cannot be deleted",
+                                                    "Sorry, deletion failure."],
                         "intent not found": "I am sorry! I don't understand you. Please try again!"
                         } # each value can be a list and then randomized choice
+
         self._ready_take_note = False
         self._facet_dict = {}
         self._non_facet_noun = ["note", "tomorrow"] # words to be removed from facet dict
@@ -89,7 +106,7 @@ class Conversation:
         str, proper response
         """
         self._ready_take_note = True # set ready_take_note to be true, then the bot will only record whatever the next sentence is.
-        return "OK, what would you like me to take?"
+        return random.choice(self._response["prepare_take_one_note"])
 
     def take_one_note(self, sentence):
         """
@@ -102,7 +119,7 @@ class Conversation:
         self.notes.append(sentence)
         self.update_facet_dict(sentence)
         self._ready_take_note = False
-        return "Alright, I have noted that."
+        return random.choice(self._response["take_one_note"])
 
     def update_facet_dict(self, sentence):
         """
@@ -138,16 +155,16 @@ class Conversation:
         # print(idx)
         if self.calc_num_notes() == 0: # there is no note
             # print("error 139")
-            return "Sorry, the note you want to retrive doesn't exist."
+            return random.choice(self._response["retrieve_one_note_sorry"])
         elif idx == np.inf or idx == -np.inf: # the quested note idx is outside of notes length
             # print("error 142")
-            return "Sorry, the note you want to retrive doesn't exist."
+            return random.choice(self._response["retrieve_one_note_sorry"])
         elif (idx > 0 and idx >= self.calc_num_notes()) or (idx < 0 and -idx > self.calc_num_notes()):
             # the quested note idx is outside of notes length
             # print("error 146", idx, self.calc_num_notes())
-            return "Sorry, the note you want to retrive doesn't exist."
+            return random.choice(self._response["retrieve_one_note_sorry"])
         else:
-            return "That note was: {}".format(self.notes[idx])
+            return "{}{}".format(random.choice(self._response["retrieve_one_note"]), self.notes[idx])
 
     def delete_one_note(self, idx=-1):
         """
@@ -158,14 +175,15 @@ class Conversation:
         str, proper response
         """
         if self.calc_num_notes() == 0:
-            return "Sorry, the note you want to delete doesn't exist."
+            return random.choice(self._response["delete_one_note_sorry"])
         elif idx == np.inf or idx == -np.inf:
-            return "Sorry, the note you want to delete doesn't exist."
+            return random.choice(self._response["delete_one_note_sorry"])
         elif (idx > 0 and idx >= self.calc_num_notes()) or (idx < 0 and -idx > self.calc_num_notes()):
-            return "Sorry, the note you want to delete doesn't exist."
+            return random.choice(self._response["delete_one_note_sorry"])
         else:
             note_del = self.notes.pop(idx)
-            return "That note '{}' is deleted".format(note_del)
+            res = random.choice(self._response["delete_one_note"])
+            return "{}{}{}' is deleted".format(res[0], note_del, res[1])
 
     def take_note_with_content(self, sentence):
         """

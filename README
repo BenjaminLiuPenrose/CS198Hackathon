@@ -13,6 +13,9 @@ Next thing to do:
 4. train a spacy model for named entity detection and keyword detection
 5. online version
 
+add more responses
+identify 2nd ordinal
+
 Misc:
 1. intent identification - add distinguish words like "how many" "?"
 	- train name entity recognizer - https://github.com/explosion/spacy/blob/master/examples/training/train_ner.py
